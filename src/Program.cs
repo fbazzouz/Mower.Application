@@ -1,12 +1,15 @@
-﻿using System;
+﻿using Mower.Application.Controllers;
+using Mower.Application.Services;
 
 namespace Mower.Application
 {
     class Program
     {
+        
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var mowerController  = new MowersController(new MowerFileService(), new MowerMouvementService());
+            mowerController.StartSimulation("testfile.txt");
         }
     }
 }

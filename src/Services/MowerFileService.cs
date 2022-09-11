@@ -1,19 +1,44 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
+using Mower.Application.Helpers;
 using Mower.Application.Models;
 
 namespace Mower.Application.Services
 {
     public class MowerFileService
     {
-        public List<MowerElement> LoadMowersFromFile(string fileAbsolutePath)
+        private List<string> LoadMowersLinesFromFile(string fileAbsolutePath)
         {
-            using (var fileStream = new FileStream(fileAbsolutePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-               fileStream
+            try {
+                List<string> fileLines = File.ReadAllLines(fileAbsolutePath).ToList();
+                return fileLines;
+            } catch (IOException e) {
+                throw new FileLoadException("Unable to read input file", e);
             }
+        }
+
+        public Lawn LoadLawnGridFromFile(string fileAbsolutePath)
+        {
+            var inputLines = this.LoadMowersLinesFromFile(fileAbsolutePath);
+            return MowerInputHelper.getLawnGrid(inputLines[0]);
+        }
+
+        public List<MowerElement> LoadMowersFromList(string fileAbsolutePath)
+        {
+            var inputLines = this.LoadMowersLinesFromFile(fileAbsolutePath);
+            var mowers = new List<MowerElement>();
+
+            if ((inputLines.Count - 1)%2 != 0)
+            {
+                throw new Exception("Commands for Lawn Mower missing");
+            }
+
+            for (int i = 1; i < inputLines.Count; i = i + 2)
+            {
+                var mowerElement = MowerInputHelper.getLawnMowerPosition(inputLines[i]);
+                mowerElement.Commands = MowerInputHelper.getLawnMowerCommands(inputLines[i + 1]);
+                mowers.Add(mowerElement);
+            }
+
+            return mowers;
         }
     }
 }
