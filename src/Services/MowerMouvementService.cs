@@ -7,7 +7,11 @@ namespace Mower.Application.Services
     {
         public MowerElement MoverMowerByCommands(MowerElement mower, Lawn lawnGrid)
         {
-           while(mower.Commands.Count > 0) {
+            if(!lawnGrid.IsPositionInsideLawn(mower.MowerCoordinates)) {
+                throw new Exception("The initial position is outside the lawn");
+            }
+
+            while(mower.Commands.Count > 0) {
                 var command = mower.Commands.Dequeue();
                 switch (command)
                 {

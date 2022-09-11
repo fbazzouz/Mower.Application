@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Mower.Application.Models;
 using Mower.Application.Services;
 
@@ -23,9 +24,15 @@ namespace Mower.Application.Controllers
             Lawn lawnGrid = _mowerFileService.LoadLawnGridFromFile(fileAbsolutePath);
             List<MowerElement> mowers = _mowerFileService.LoadMowersFromList(fileAbsolutePath);
 
-            foreach(var mower in mowers) {
-                Console.WriteLine(_mowerMouvementService.MoverMowerByCommands(mower, lawnGrid).ToString());
-            }
+            // Use Dictionary to conserve the input order elements even with threads functions
+            // Concurrent dictionary is used to support adding elements inside threads 
+            var resultMap = new ConcurrentDictionary<int, string>();
+
+            Parallel.For(0, mowers.Count, i => {
+                resultMap.TryAdd(i, _mowerMouvementService.MoverMowerByCommands(mowers[i], lawnGrid).ToString());
+            });
+            
+            resultMap.OrderBy(x => x.Key).ToList().ForEach(x => Console.WriteLine(x.Value));
         }
     }
 }
