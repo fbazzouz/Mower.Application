@@ -9,7 +9,7 @@ namespace Mower.Application
         static void Main(string[] args)
         {
             var mowerController  = new MowersController(new MowerFileService(), new MowerMouvementService());
-            mowerController.StartSimulation("testfile.txt");
+            mowerController.StartSimulation("inputFile.txt");
         }
     }
 }
